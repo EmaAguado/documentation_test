@@ -1,0 +1,312 @@
+/* Variables basadas en la paleta */
+[data-md-color-scheme="default"] {
+  --chat-popup-bg: var(--md-code-bg-color);
+  --chat-popup-border: var(--md-divider-color, #ccc);
+  --chat-button-bg: var(--md-primary-fg-color--light);
+  --chat-button-hover: var(--md-accent-fg-color);
+  
+  /* Fondos para mensajes */
+  --chat-user-bg: var(--md-primary-fg-color--light);  /* Fondo para mensajes del usuario */
+  --chat-bot-bg: rgba(0, 0, 0, 0.05);
+  --chat-error-bg: rgba(255, 0, 0, 0.2);
+}
+
+[data-md-color-scheme="slate"] {
+  --chat-popup-bg: var(--md-code-bg-color);
+  --chat-popup-border: var(--md-divider-color, #444);
+  --chat-button-bg: var(--md-primary-fg-color--dark);
+  --chat-button-hover: var(--md-accent-fg-color);
+  
+  --chat-user-bg: var(--md-primary-fg-color--dark);
+  --chat-bot-bg: rgba(255, 255, 255, 0.05);
+  --chat-error-bg: rgba(255, 0, 0, 0.2);
+}
+
+/* Botón flotante (icono del bot: 🤖) */
+#chat-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--chat-button-bg);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+#chat-button:hover {
+  transform: scale(1.05);
+  background-color: var(--chat-button-hover);
+}
+
+/* Popup del chat */
+#chat-popup {
+  display: none;
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 320px;
+  height: 400px;
+  background: var(--chat-popup-bg);
+  border: 1px solid var(--chat-popup-border);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  overflow: hidden;
+  flex-direction: column;
+  border-radius: 8px;
+  z-index: 1000;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease, height 0.3s ease;
+}
+#chat-popup.open {
+  display: flex;
+  transform: translateY(0);
+  opacity: 1;
+}
+#chat-popup.enlarged {
+  width: 600px;
+  height: 600px;
+}
+[data-md-color-scheme="default"] #chat-popup header {
+  background: rgba(0, 0, 0, 0.1); /* Un gris claro para modo claro */
+}
+[data-md-color-scheme="slate"] #chat-popup header {
+  background: rgba(0, 0, 0, 0.3); /* Un gris más oscuro para modo oscuro */
+}
+/* Header del chat */
+#chat-popup header {
+  background: inherit;
+  color: inherit;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  font-size: 1.2em;
+}
+#chat-popup header button,
+#chat-popup header span#close-chat {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.8em; /* Botones más grandes */
+  color: inherit;
+  margin-right: 10px;
+  transition: color 0.3s ease;
+}
+#chat-popup header button:hover,
+#chat-popup header span#close-chat:hover {
+  color: var(--chat-button-hover);
+}
+
+/* Área de mensajes */
+#chat-popup .content {
+  flex: 1;
+  padding: 15px 10px;
+  overflow-y: auto;
+  background: inherit;
+}
+
+/* Cada mensaje */
+#chat-popup .chat-message {
+  margin-bottom: 15px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  max-width: 80%; /* Limitar ancho */
+}
+#chat-popup .chat-message.user {
+  align-self: flex-end;
+  margin-left: 20%; /* Evita que llegue hasta el borde izquierdo */
+}
+#chat-popup .chat-message.bot {
+  align-self: flex-start;
+  margin-right: 20%; /* Evita que llegue hasta el borde derecho */
+}
+#chat-popup .chat-message .message-info {
+  font-size: 1.2em; /* Texto de remitente y fecha/hora más grande */
+  color: #777;
+  margin-bottom: 5px;
+}
+#chat-popup .chat-message.user .message-info {
+  text-align: right;
+}
+#chat-popup .chat-message.bot .message-info {
+  text-align: left;
+}
+/* Caja del mensaje */
+#chat-popup .chat-message .message-content {
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 1.2em; /* Texto del mensaje más grande */
+  background: var(--chat-bot-bg);
+  color: inherit;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+#chat-popup .chat-message.user .message-content {
+  background: var(--chat-user-bg);
+  text-align: right;
+}
+/* Fondo rojo para mensajes de error */
+#chat-popup .chat-message.error .message-content {
+  background: var(--chat-error-bg);
+}
+
+/* Animación "pensando..." */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.pensando {
+  animation: blink 1s infinite;
+  font-style: italic;
+}
+
+/* Footer del chat: contenedor del input y botón */
+#chat-popup footer {
+  padding: 10px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+}
+#chat-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+/* Div contenteditable para simular el input */
+#chat-input-container #chat-input {
+  width: 100%;
+  min-height: 60px;
+  padding: 15px 70px 15px 15px;  /* Espacio a la derecha para el botón */
+  border: 1px solid var(--chat-popup-border);
+  border-radius: 20px;
+  background: transparent;
+  font-size: 15px;
+  color: inherit;
+  outline: none;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  overflow-y: hidden;
+  transition: background-color 0.3s ease;
+  text-align: left;
+  cursor: text;
+}
+#chat-input-container #chat-input:empty::before {
+  content: attr(placeholder);
+  color: #aaa;
+  display: block;
+  text-align: left;
+}
+#chat-input-container #chat-input:hover,
+#chat-input-container #chat-input:focus {
+  background-color: rgba(0,0,0,0.05);
+}
+/* Botón de envío: dentro del contenedor, con fondo y bordes suavizados */
+#chat-input-container button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 1px solid var(--chat-popup-border);
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: var(--chat-button-bg);
+  cursor: pointer;
+  font-size: 20px;
+  color: #fff;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#chat-input-container button:hover {
+  background-color: var(--chat-button-hover);
+  border-color: var(--chat-button-hover);
+}
+
+/* --- Modificaciones para el subwidget de think --- */
+
+/* Contenedor del subwidget de think: fondo transparente, menos padding/margen */
+.think-subwidget {
+  margin-bottom: 10px;    /* Espacio inferior máximo de 10px */
+  background: transparent; /* Fondo transparente */
+  padding: 2px;           /* Padding reducido */
+  border-radius: 0;       /* Sin redondeo */
+}
+
+/* Contenedor colapsado de think: altura fija (aproximadamente 3 líneas) y opacidad del 30% */
+.think-text-collapsed {
+  max-height: 3.5em;       /* Altura aproximada para 3 líneas, ajustable según fuente */
+  overflow-y: auto;
+  scrollbar-width: none;   /* Oculta la barra en Firefox */
+  -ms-overflow-style: none;/* Oculta la barra en IE y Edge */
+  color: currentColor;     /* Usa el color actual del template */
+  opacity: 0.3;            /* Aplica opacidad del 30% al texto */
+}
+.think-text-collapsed::-webkit-scrollbar {
+  display: none;           /* Oculta la barra en Chrome, Safari y Opera */
+}
+
+/* Reducir margen entre el subwidget de think y el subwidget normal */
+.normal-text-subwidget {
+  margin: 0;
+  padding: 0;
+}
+
+/* Oculta el botón de toggle para que no se expanda */
+.toggle-think-text {
+  display: none;
+}
+/* Forzar altura automática en el widget de mensaje del chatbot */
+/* Forzar que el widget del mensaje del chatbot se ajuste al contenido sin espacios extra */
+/* Ajusta el contenedor que agrupa ambos subwidgets */
+.chat-message.bot .message-content {
+  margin: 0;
+  padding: 0 5px; /* Solo un pequeño padding a los lados */
+  line-height: 1.2;
+}
+
+.chat-message.bot .message-info {
+  margin: 0;
+  padding: 0 5px; /* Solo un pequeño padding a los lados */
+  line-height: 1.2;
+}
+/* Asegura que los subwidgets se ajusten al contenido sin espacios verticales innecesarios */
+.chat-message.bot .think-subwidget,
+.chat-message.bot .normal-text-subwidget {
+  margin: 0;
+  padding: 0;
+}
+
+/* Si se desea separar un poco ambos subwidgets, se puede dejar un margen mínimo entre ellos */
+.chat-message.bot .think-subwidget + .normal-text-subwidget {
+  margin-top: 2px;
+}
+
+.chat-message.pause .message-content {
+  background-color: indigo !important;
+}
+
+/* Estilos para el botón "Reintentar" */
+.retry-button {
+  display: block;
+  width: 100%;
+  margin-top: 20px;
+  padding: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: rgba(75, 0, 130, 0.5); /* Indigo con transparencia */
+  color: #fff;
+  transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+  background-color: rgba(31, 0, 53, 0.7);
+}
