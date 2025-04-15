@@ -1,0 +1,8 @@
+setup.py
+mkdocs_vtranscript/__init__.py
+mkdocs_vtranscript/plugin.py
+mkdocs_vtranscript_plugin.egg-info/PKG-INFO
+mkdocs_vtranscript_plugin.egg-info/SOURCES.txt
+mkdocs_vtranscript_plugin.egg-info/dependency_links.txt
+mkdocs_vtranscript_plugin.egg-info/entry_points.txt
+mkdocs_vtranscript_plugin.egg-info/top_level.txt

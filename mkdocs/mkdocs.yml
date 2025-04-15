@@ -1,0 +1,44 @@
+site_name: Wiki GwaIO
+nav:
+  - Inicio: index.md
+  - GwaIO: workflow/home.md
+  - Dev:
+    - Introducción: dev/home.md
+theme:
+  name: material
+  custom_dir: overrides
+  icon: 
+    logo: gwaio-icon
+  favicon: resources/img/gwaio-favicon.ico
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/weather-sunny
+        name: Tema claro
+    - scheme: slate
+      toggle:
+        icon: material/weather-night
+        name: Tema oscuro
+      media: "(prefers-color-scheme: dark)"
+  features:
+    - navigation.indexes
+    - navigation.tracking
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+markdown_extensions:
+  - admonition
+  - pymdownx.blocks.caption
+extra_css:
+  - css/chat.css
+  - css/extra.css
+extra_javascript:
+  - js/chat.js
+plugins:
+  - search
+  - glightbox
+  - mkdocs-video:
+      is_video: True
+      video_autoplay: False
+  - mkdocs-vtranscript
+  - mkdocstrings

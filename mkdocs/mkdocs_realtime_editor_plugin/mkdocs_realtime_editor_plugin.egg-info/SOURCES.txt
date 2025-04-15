@@ -1,0 +1,8 @@
+setup.py
+mkdocs_realtime_editor/__init__.py
+mkdocs_realtime_editor/plugin.py
+mkdocs_realtime_editor_plugin.egg-info/PKG-INFO
+mkdocs_realtime_editor_plugin.egg-info/SOURCES.txt
+mkdocs_realtime_editor_plugin.egg-info/dependency_links.txt
+mkdocs_realtime_editor_plugin.egg-info/entry_points.txt
+mkdocs_realtime_editor_plugin.egg-info/top_level.txt

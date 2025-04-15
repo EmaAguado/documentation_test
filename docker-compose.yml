@@ -1,0 +1,16 @@
+services:
+  api:
+    build: ./api
+    container_name: documentation_api
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./mkdocs/docs:/app/docs
+
+  mkdocs:
+    build: ./mkdocs
+    container_name: mkdocs_web
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./mkdocs/docs:/app/docs

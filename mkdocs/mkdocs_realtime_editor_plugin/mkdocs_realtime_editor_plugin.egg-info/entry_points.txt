@@ -1,0 +1,2 @@
+[mkdocs.plugins]
+mkdocs-realtime-editor = mkdocs_realtime_editor.plugin:RealtimeEditor
