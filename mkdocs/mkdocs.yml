@@ -1,8 +1,13 @@
 site_name: Wiki GwaIO
 nav:
   - Inicio: index.md
-  - GwaIO: workflow/home.md
-  - Dev:
+  - User Guide: 
+      - Introducción: user/setup.md
+      - Interfaz: 
+        - Paneles: user/interface/panels.md
+        - Toolbars: user/interface/toolbars.md
+      - Workflow: user/workflow.md
+  - Dev Guide:
     - Introducción: dev/home.md
 theme:
   name: material
@@ -21,17 +26,25 @@ theme:
         name: Tema oscuro
       media: "(prefers-color-scheme: dark)"
   features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.instant.preview
     - navigation.indexes
     - navigation.tracking
     - navigation.footer
+    - navigation.top
     - search.suggest
     - search.highlight
 markdown_extensions:
   - admonition
   - pymdownx.blocks.caption
+  - attr_list
+  - md_in_html
+
 extra_css:
   - css/chat.css
   - css/extra.css
+  - css/gwaio.css
 extra_javascript:
   - js/chat.js
 plugins:

@@ -10,3 +10,5 @@ EXPOSE 8001
 
 # CMD ["uvicorn", "main:app", "--host", "localhost", "--port", "8001"]
 CMD ["fastapi", "run", "main.py", "--port", "8001"]
+# docker compose pull wiki
+# docker-compose up -d    
