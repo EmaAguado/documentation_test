@@ -1,14 +1,18 @@
 (function() {
-  // 1) Origen de la web (https://localhost:8000 o https://emaaguado.github.io)
-  const ORIGIN = window.location.origin;
+  // 1) Leemos el <base> inyectado por MkDocs/GH-Pages
+  const baseEl = document.querySelector('base');
+  // baseEl.href suele ser algo como:
+  // - 'https://localhost:8000/'      en local
+  // - 'https://emaaguado.github.io/documentation_test/' en prod
+  const baseHref = baseEl
+    ? new URL(baseEl.href).pathname.replace(/\/$/, '')  // '/documentation_test' o ''
+    : '';
 
-  // 2) Base href de MkDocs ("/" en local, "/documentation_test/" en GitHub Pages)
-  const rawBase = document.querySelector('base')?.getAttribute('href') || '/';
-  //    Lo dejamos sin slash final, para concatenar con seguridad
-  const BASE_PATH = rawBase.replace(/\/$/, '');
+  // 2) Definimos solo el pathname de login
+  const LOGIN_PATHNAME = `${baseHref}/login/`;  // '/login/' o '/documentation_test/login/'
 
-  // 3) Construimos la URL absoluta de login
-  const LOGIN_URL = `${ORIGIN}${BASE_PATH}/login/`;
+  // 3) Construimos la URL absoluta
+  const LOGIN_URL = `${window.location.origin}${LOGIN_PATHNAME}`;
 
   const API_TOKEN    = 'https://mondotv-api.herokuapp.com/api/v1/session/token';
   const STORAGE_KEY  = 'mkdocs_auth_token';
@@ -70,9 +74,9 @@
         }
 
         startSession(token);
-        const target = sessionStorage.getItem(REDIRECT_KEY) || `${ORIGIN}${BASE_PATH}/`;
+        const targetPath = sessionStorage.getItem(REDIRECT_KEY) || `${baseHref}/`;
         sessionStorage.removeItem(REDIRECT_KEY);
-        window.location.replace(target);
+        window.location.replace(`${window.location.origin}${targetPath}`);
 
       } catch (err) {
         console.error('Login failed:', err);
@@ -92,25 +96,25 @@
   async function requireLogin() {
     const { pathname, search } = window.location;
 
-    // Si estamos ya en la página de login, arrancamos el form
-    if (`${ORIGIN}${pathname}` === LOGIN_URL) {
+    // 1) Si ya estamos EXACTAMENTE en el login, solo mostramos el form
+    if (pathname === LOGIN_PATHNAME) {
       document.documentElement.style.visibility = '';
       return handleLoginForm();
     }
 
-    // Si no hay sesión válida, guardamos destino y vamos a login
+    // 2) Si no hay sesión válida, guardamos destino y vamos a login
     if (!isSessionValid()) {
       clearSession();
       sessionStorage.setItem(REDIRECT_KEY, pathname + search);
       window.location.replace(LOGIN_URL);
     } else {
-      // sesion válida → refrescamos timestamp y mostramos
+      // 3) Sesión válida → refrescamos ts y mostramos contenido
       startSession(localStorage.getItem(STORAGE_KEY));
       document.documentElement.style.visibility = '';
     }
   }
 
-  // Ocultamos el contenido hasta validar o mostrar form
+  // Al arrancar, ocultamos TODO hasta el requireLogin()
   document.documentElement.style.visibility = 'hidden';
   requireLogin();
 })();
