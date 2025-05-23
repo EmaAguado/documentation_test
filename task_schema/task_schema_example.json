@@ -1,0 +1,17 @@
+{
+  "compulsory_fields" : { 
+    "local_root" : "must be an environment variable defined in the environment",
+    "server_root" : "must be an environment variable defined in the environment",
+    "directory" : "must contain the set of folders between the root and the name fields",
+    "name" : "must follow naming convention",
+    "id" : "must be unique"
+   },
+  "project_fields": { 
+    "entity" : "this usually follows an standard such as asset, shot etc.",
+    "assignee" : "no definition"
+   },
+  "optional_fields" : { 
+    "bid" : "no definition",
+    "subfolders" : "a list of folders that must exist within the task folder"
+   }
+}

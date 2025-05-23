@@ -1,0 +1,12 @@
+[
+  {
+    "name": "publisher",
+    "path": "publisher",
+    "enabled": true
+  },
+  {
+    "name": "task_schema",
+    "path": "task_schema",
+    "enabled": true
+  }
+]

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+
+  <script>
+    document.documentElement.style.visibility = 'hidden';
+  </script>
+
+  {% if page is defined and page.file is defined and page.file.src_path == "login.md" %}
+    <style>
+      .md-header,
+      .md-footer,
+      .md-sidebar,
+      .md-tabs,
+      .md-top,
+      .md-announce {
+        display: none !important;
+      }
+
+      .md-main__inner {
+        display: flex;
+        justify-content: center;
+      }
+
+      .md-content {
+        max-width: 480px;
+        padding: 2rem;
+      }
+    </style>
+  {% endif %}
+{% endblock %}
+

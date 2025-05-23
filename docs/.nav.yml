@@ -1,0 +1,30 @@
+ignore:
+  - "examples/"
+  - "tests/"
+
+# append_unmatched: true 
+
+nav:
+  - Inicio: index.md
+  - User Guide:
+      - Introducción: user/setup.md
+      - Interfaz: 
+        - Paneles: user/interface/panels.md
+        - Toolbars: user/interface/toolbars.md
+      - Workflow: user/workflow.md
+  - Dev Guide:
+    - Introducción: dev/home.md
+    - publisher: 
+      - Introducción: dev/publisher/readme.md
+      - Examples: dev/publisher/examples.md
+      - Modules: dev/publisher/modules.md
+      - api:
+        - dev/publisher/*.md
+        - dev/publisher/*
+    - plugins: 
+      - Introducción: dev/task_schema/readme.md
+      - Examples: dev/task_schema/examples.md
+      - Modules: dev/task_schema/modules.md
+      - api:
+        - dev/task_schema/*.md
+        - dev/task_schema/*

@@ -1,0 +1,151 @@
+site_name: Wiki GwaIO
+# repo_name: "ToDo"
+# repo_url: ToDo
+# site_url: ToDo
+site_description: GwaIO Pipeline 3D tool Documentation
+site_author: Emanuel Aguado Pérez
+copyright: Copyright &copy; 2025 Mondo TV Studios
+    
+
+theme:
+  name: material
+  custom_dir: material/overrides
+  icon: 
+    logo: gwaio-icon
+  favicon: assets/logos/gwaio-favicon.ico
+  palette:
+    - scheme: default
+      # accent: deep purple
+      toggle:
+        icon: material/weather-sunny
+        name: Tema claro
+    - scheme: slate
+      # accent: deep purple
+      toggle:
+        icon: material/weather-night
+        name: Tema oscuro
+      media: "(prefers-color-scheme: dark)"
+  features:
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate 
+    - navigation.tabs
+    # - navigation.tabs.sticky
+    - navigation.instant.preview
+    - navigation.indexes
+    - navigation.tracking
+    - navigation.footer
+    - navigation.top
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - admonition
+  - pymdownx.blocks.caption
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+      options:
+        custom_icons:
+          - material/overrides/.icons
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+extra:
+  generator: false
+  status:
+    new: Recently added
+    deprecated: Deprecated
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+  social:
+    - icon: fontawesome/brands/github
+      link: https://mondotvstudios.com/
+    - icon: fontawesome/brands/docker
+      link: https://mondotvstudios.com/
+    - icon: fontawesome/brands/python
+      link: https://mondotvstudios.com/
+    - icon: fontawesome/brands/x-twitter
+      link: https://mondotvstudios.com/
+  # alternate:
+    # Switch to English
+    # - name: English
+    #   #link: https://leverage.binbash.co
+    #   link: /
+    #   lang: en
+
+    # # Switch to Spanish
+    # - name: Spanish
+    #   #link: https://leverage.binbash.co/es/
+    #   link: /es
+    #   lang: es
+
+extra_css:
+  - css/banner.css
+  - css/chat.css
+  - css/extra.css
+  - css/gwaio.css
+  - css/mkdocstrings.css
+
+extra_javascript:
+  - js/chat.js
+  - js/auth.js
+
+
+plugins:
+  - search
+  - glightbox
+  - mkdocs-video:
+      is_video: True
+      video_autoplay: False
+  # - mkdocs-vtranscript
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          load_external_modules: false
+          options:
+            allow_inspection: false
+            filters:
+              - "!^_[^_]"
+            backlinks: tree
+            docstring_options:
+              ignore_init_summary: true
+            docstring_section_style: list
+            filters: public
+            # heading_level: 1
+            inherited_members: true
+            line_length: 88
+            merge_init_into_class: true
+            parameter_headings: true
+            relative_crossrefs: true
+            scoped_crossrefs: true
+            separate_signature: true
+            show_bases: false
+            show_inheritance_diagram: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            show_source: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            show_submodules: true
+            signature_crossrefs: true
+            summary: true
+            unwrap_annotated: true
+          paths:
+            - publisher
+            - task_schema
+  - awesome-nav
+  - gen-files:
+      scripts:
+        - scripts/gen_addon_docs.py
+        # - scripts/custom.py

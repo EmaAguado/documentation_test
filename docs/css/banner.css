@@ -1,0 +1,108 @@
+/* Banner full-width sin padding de MkDocs */
+.banner {
+    margin-top: -2.5rem !important;  /* ajusta el valor según veas en devtools */
+    position: relative;
+    width: 100vw;            /* ocupa todo el ancho de la ventana */
+    left: 50%;
+    margin-left: -50vw;      /* compensa el padding del contenedor */
+    max-width: none;
+    height: 400px;           /* altura fija */
+    overflow: hidden;
+    z-index: 0;
+  }
+  
+  /* Viñeta oscura en los bordes */
+  .banner::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0,0,0,0) 50%,
+      rgba(0,0,0,0.4) 100%
+    );
+    z-index: 2;
+  }
+  
+  /* Nieblas blancas densas */
+  .banner::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(255,255,255,0.5),  /* denso abajo */
+      rgba(255,255,255,0) 70%
+    );
+    z-index: 2;
+  }
+  
+  /* Vídeo interno con zoom inicial */
+  .banner-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: cover;
+    transform: translate(-50%, -50%) scale(1.5);
+    will-change: transform;
+  }
+  
+  /* Contenido superpuesto */
+  .banner-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    text-align: center;
+    color: #fff;
+    padding: 0;               /* sin padding lateral */
+  }
+  
+  /* Título en negrita con sombra */
+  .banner-content h1 {
+    font-size: 3rem;
+    margin: 0;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+  }
+  
+  /* Subtítulo en negrita con sombra sutil */
+  .banner-content .subtitle {
+    font-size: 1.25rem;
+    margin: 0.25rem 0 1rem;
+    opacity: 0.9;
+    font-weight: bold;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+  }
+  
+  /* Botones con sombra */
+  .banner-content .btn {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.9rem;
+    background: rgba(0,0,0,0.6);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  
+  /* Hover en botones */
+  .banner-content .btn:hover {
+    background: rgba(0,0,0,0.8);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.6);
+  }
+  
+  /* Separación entre botones */
+  .banner-content .btn + .btn {
+    margin-left: 0.75rem;
+  }
+  
