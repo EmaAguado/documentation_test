@@ -1,13 +1,15 @@
 (function() {
-  // 1. Leemos el <base href="..."> que MkDocs/GitHub Pages pone en el <head>
-  const baseHref = document
-    .querySelector('base')
-    ?.getAttribute('href')  // p. ej. '/documentation_test/'
-    || '/';
-  const BASE_PATH = baseHref.replace(/\/$/, '');  // quita la slash final
+  // 1) Origen de la web (https://localhost:8000 o https://emaaguado.github.io)
+  const ORIGIN = window.location.origin;
 
-  // 2. Definimos LOGIN_PATH sobre ese BASE_PATH limpio
-  const LOGIN_PATH   = `${BASE_PATH}/login/`;    // '/documentation_test/login/' o '/login/'
+  // 2) Base href de MkDocs ("/" en local, "/documentation_test/" en GitHub Pages)
+  const rawBase = document.querySelector('base')?.getAttribute('href') || '/';
+  //    Lo dejamos sin slash final, para concatenar con seguridad
+  const BASE_PATH = rawBase.replace(/\/$/, '');
+
+  // 3) Construimos la URL absoluta de login
+  const LOGIN_URL = `${ORIGIN}${BASE_PATH}/login/`;
+
   const API_TOKEN    = 'https://mondotv-api.herokuapp.com/api/v1/session/token';
   const STORAGE_KEY  = 'mkdocs_auth_token';
   const TIME_KEY     = 'mkdocs_auth_time';
@@ -39,11 +41,9 @@
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      if (loginButton && spinner) {
-        loginButton.classList.add('loading');
-        loginButton.disabled = true;
-        spinner.classList.remove('sr-only');
-      }
+      loginButton?.classList.add('loading');
+      loginButton && (loginButton.disabled = true);
+      spinner?.classList.remove('sr-only');
 
       const user      = form.user.value;
       const pass      = form.pass.value;
@@ -70,7 +70,7 @@
         }
 
         startSession(token);
-        const target = sessionStorage.getItem(REDIRECT_KEY) || `${BASE_PATH}/`;
+        const target = sessionStorage.getItem(REDIRECT_KEY) || `${ORIGIN}${BASE_PATH}/`;
         sessionStorage.removeItem(REDIRECT_KEY);
         window.location.replace(target);
 
@@ -82,11 +82,9 @@
           errorDiv.style.display = 'block';
         }
       } finally {
-        if (loginButton && spinner) {
-          loginButton.classList.remove('loading');
-          loginButton.disabled = false;
-          spinner.classList.add('sr-only');
-        }
+        loginButton?.classList.remove('loading');
+        loginButton && (loginButton.disabled = false);
+        spinner?.classList.add('sr-only');
       }
     });
   }
@@ -94,25 +92,25 @@
   async function requireLogin() {
     const { pathname, search } = window.location;
 
-    // Si ya estamos justo en /<base>/login/, arrancamos el form
-    if (pathname === LOGIN_PATH) {
+    // Si estamos ya en la página de login, arrancamos el form
+    if (`${ORIGIN}${pathname}` === LOGIN_URL) {
       document.documentElement.style.visibility = '';
       return handleLoginForm();
     }
 
-    // Si no hay sesión, guardamos destino y redirigimos
+    // Si no hay sesión válida, guardamos destino y vamos a login
     if (!isSessionValid()) {
       clearSession();
       sessionStorage.setItem(REDIRECT_KEY, pathname + search);
-      window.location.replace(LOGIN_PATH);
+      window.location.replace(LOGIN_URL);
     } else {
-      // refrescamos la hora de la sesión y mostramos contenido
+      // sesion válida → refrescamos timestamp y mostramos
       startSession(localStorage.getItem(STORAGE_KEY));
       document.documentElement.style.visibility = '';
     }
   }
 
-  // Ocultamos todo hasta haber comprobado sesión / login
+  // Ocultamos el contenido hasta validar o mostrar form
   document.documentElement.style.visibility = 'hidden';
   requireLogin();
 })();
