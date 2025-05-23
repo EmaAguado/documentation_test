@@ -1,4 +1,10 @@
 document.addEventListener("DOMContentLoaded", async function () {
+  const excludedPaths = ["/login/"];
+
+  // Verifica si la ruta actual está en la lista
+  if (excludedPaths.includes(window.location.pathname)) {
+    return; // Detiene la ejecución del bot
+  }
   let funnyMessages;
   try {
     const module = await import("./chat_error_messages.js");
@@ -52,7 +58,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     popup.id = "chat-popup";
     popup.innerHTML = `
       <header>
-        <span>MondoBot</span>
+        <span>GwaIO bot</span>
         <div>
           <button id="enlarge-chat" title="Ampliar chat">&#x26F6;</button>
           <span id="close-chat" style="cursor:pointer;" title="Cerrar chat">&times;</span>
@@ -79,7 +85,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     document.getElementById("enlarge-chat").addEventListener("click", () => { popup.classList.toggle("enlarged"); });
     
     // Si el tipo es "pause", se inyecta la clase para fondo naranja en el CSS (defínela en tu hoja de estilos)
-    function addMessage(sender, text, type = "MondoBot", id = null) {
+    function addMessage(sender, text, type = "GwaIO bot", id = null) {
       const now = new Date(), timestamp = formatTimestamp(now),
             raw = `
         <div class="chat-message ${type}" ${id ? `id="${id}"` : ""}>
@@ -95,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             raw = `
         <div class="chat-message bot" id="${id}">
           <div class="message-info">
-            <span class="sender">MondoBot</span> • <span class="timestamp">${timestamp}</span>
+            <span class="sender">GwaIO bot</span> • <span class="timestamp">${timestamp}</span>
           </div>
           <div class="message-content">
             <div class="think-subwidget">
@@ -120,7 +126,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             raw = `
         <div class="chat-message bot">
           <div class="message-info">
-            <span class="sender">MondoBot</span> • <span class="timestamp">${timestamp}</span>
+            <span class="sender">GwaIO bot</span> • <span class="timestamp">${timestamp}</span>
           </div>
           <div class="message-content">
             <div class="normal-text-subwidget">
@@ -142,7 +148,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         isProcessing = false;
         document.getElementById("send-chat").querySelector("i").textContent = origSend;
         const randomPause = pauseMessages[Math.floor(Math.random() * pauseMessages.length)];
-        addMessage("MondoBot", randomPause, "pause");
+        addMessage("GwaIO bot", randomPause, "pause");
         const pauseMsgEl = document.querySelector(".chat-message.pause");
         if (pauseMsgEl) {
           const retryBtn = document.createElement("button");
@@ -240,7 +246,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (error.name === "AbortError") return;
         document.getElementById(currentThinkingId)?.remove();
         const randomMsg = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
-        addMessage("MondoBot", `<span style="display:block; background-color: var(--chat-error-bg); padding: 5px; border-radius: 4px;">${randomMsg}</span>`, "error");
+        addMessage("GwaIO bot", `<span style="display:block; background-color: var(--chat-error-bg); padding: 5px; border-radius: 4px;">${randomMsg}</span>`, "error");
       } finally {
         isProcessing = false;
         abortController = null;

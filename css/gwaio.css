@@ -1,14 +1,11 @@
 img {
-    /* Bordes redondeados */
-    border-radius: 8px; /* Ajusta este valor para más o menos redondez */
-  
-    /* Sombra */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ajusta los valores para cambiar la sombra */
-  
-    /* Opcional: asegura que las imágenes se ajusten al contenedor */
-    max-width: 100%;
-    height: auto;
-  }
+  border-radius: 8px;
+  max-width: 100%;
+  display: block;
+  object-fit: cover;
+  max-width: 100%;
+  height: auto;
+}
 
 /* Grid de 3 columnas */
 .grid-container {
@@ -19,11 +16,11 @@ gap: 10px;
 
 /* Estilos para las imágenes dentro del grid */
 .grid-container img {
-display: block;        /* La imagen se comporta como bloque */
-margin: 0 auto;        /* Centrado horizontal */
-width: 100px;          /* Ancho fijo */
-height: 100px;         /* Alto fijo */
-object-fit: cover;     /* Cubre el contenedor sin deformarse */
+display: block;        
+margin: 0 auto;        
+width: 100px;          
+height: 100px;         
+object-fit: cover;     
 }
 
 /* Botones con borde redondeado y contenido centrado */
