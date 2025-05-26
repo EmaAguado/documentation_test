@@ -1,13 +1,19 @@
 (function() {
-  // 1. Leemos el <base href="..."> que MkDocs/GitHub Pages pone en el <head>
-  const baseHref = document
-    .querySelector('base')
-    ?.getAttribute('href')  // p. ej. '/documentation_test/'
-    || '/';
-  const BASE_PATH = baseHref.replace(/\/$/, '');  // quita la slash final
+  const { origin, host, pathname, search } = window.location;
 
-  // 2. Definimos LOGIN_PATH sobre ese BASE_PATH limpio
-  const LOGIN_PATH   = `${BASE_PATH}/login/`;    // '/documentation_test/login/' o '/login/'
+  // Detectamos si estamos en GitHub Pages (ej. "usuario.github.io")
+  const onGitHubPages = host.endsWith('.github.io');
+
+  // Si es GH-Pages, el primer segmento de pathname es el repo; si no, no hay base
+  const segments = pathname.split('/').filter(Boolean);
+  const repoBase  = onGitHubPages && segments.length
+    ? `/${segments[0]}`   // "/documentation_test"
+    : '';                 // en local, ""
+
+  // Construimos el pathname y la URL completa de login
+  const LOGIN_PATHNAME = `${repoBase}/login/`;        // "/login/" o "/documentation_test/login/"
+  const LOGIN_URL      = `${origin}${LOGIN_PATHNAME}`;
+
   const API_TOKEN    = 'https://mondotv-api.herokuapp.com/api/v1/session/token';
   const STORAGE_KEY  = 'mkdocs_auth_token';
   const TIME_KEY     = 'mkdocs_auth_time';
@@ -34,19 +40,17 @@
     const form = document.getElementById('login-form');
     if (!form) return;
 
-    const loginButton = document.getElementById('login-button');
-    const spinner     = document.getElementById('btn-spinner');
+    const btn = document.getElementById('login-button');
+    const sp  = document.getElementById('btn-spinner');
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
-      if (loginButton && spinner) {
-        loginButton.classList.add('loading');
-        loginButton.disabled = true;
-        spinner.classList.remove('sr-only');
-      }
+      btn?.classList.add('loading');
+      if (btn) btn.disabled = true;
+      sp?.classList.remove('sr-only');
 
-      const user      = form.user.value;
-      const pass      = form.pass.value;
+      const user = form.user.value;
+      const pass = form.pass.value;
       const machineId = 'browser-' + navigator.userAgent;
       const basic     = btoa(`${user}:${pass}`);
 
@@ -60,59 +64,51 @@
           },
           body: JSON.stringify({ machine_id: machineId })
         });
+        if (!resp.ok) throw new Error(`Error ${resp.status}`);
 
-        if (!resp.ok) {
-          throw new Error(`Error ${resp.status}: ${resp.statusText}`);
-        }
         const { access_token: token } = await resp.json();
-        if (!token) {
-          throw new Error('No se recibió access_token');
-        }
+        if (!token) throw new Error('No se recibió access_token');
 
         startSession(token);
-        const target = sessionStorage.getItem(REDIRECT_KEY) || `${BASE_PATH}/`;
+        const targetPath = sessionStorage.getItem(REDIRECT_KEY) || `${repoBase}/`;
         sessionStorage.removeItem(REDIRECT_KEY);
-        window.location.replace(target);
+        window.location.replace(`${origin}${targetPath}`);
 
       } catch (err) {
         console.error('Login failed:', err);
-        const errorDiv = document.getElementById('error');
-        if (errorDiv) {
-          errorDiv.textContent = 'Usuario o contraseña incorrectos';
-          errorDiv.style.display = 'block';
+        const errDiv = document.getElementById('error');
+        if (errDiv) {
+          errDiv.textContent = 'Usuario o contraseña incorrectos';
+          errDiv.style.display = 'block';
         }
       } finally {
-        if (loginButton && spinner) {
-          loginButton.classList.remove('loading');
-          loginButton.disabled = false;
-          spinner.classList.add('sr-only');
-        }
+        btn?.classList.remove('loading');
+        if (btn) btn.disabled = false;
+        sp?.classList.add('sr-only');
       }
     });
   }
 
   async function requireLogin() {
-    const { pathname, search } = window.location;
-
-    // Si ya estamos justo en /<base>/login/, arrancamos el form
-    if (pathname === LOGIN_PATH) {
+    // Si ya estamos exactamente en la URL de login, arrancamos el form
+    if (pathname === LOGIN_PATHNAME) {
       document.documentElement.style.visibility = '';
       return handleLoginForm();
     }
 
-    // Si no hay sesión, guardamos destino y redirigimos
+    // Si no hay sesión, redirigimos a login
     if (!isSessionValid()) {
       clearSession();
       sessionStorage.setItem(REDIRECT_KEY, pathname + search);
-      window.location.replace(LOGIN_PATH);
+      window.location.replace(LOGIN_URL);
     } else {
-      // refrescamos la hora de la sesión y mostramos contenido
+      // Sesión válida: refrescamos timestamp y mostramos contenido
       startSession(localStorage.getItem(STORAGE_KEY));
       document.documentElement.style.visibility = '';
     }
   }
 
-  // Ocultamos todo hasta haber comprobado sesión / login
+  // Ocultamos todo hasta validar la sesión o mostrar el login
   document.documentElement.style.visibility = 'hidden';
   requireLogin();
 })();
