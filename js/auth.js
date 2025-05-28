@@ -1,114 +1,136 @@
-(function() {
+(async function() {
   const { origin, host, pathname, search } = window.location;
-
-  // Detectamos si estamos en GitHub Pages (ej. "usuario.github.io")
   const onGitHubPages = host.endsWith('.github.io');
-
-  // Si es GH-Pages, el primer segmento de pathname es el repo; si no, no hay base
   const segments = pathname.split('/').filter(Boolean);
-  const repoBase  = onGitHubPages && segments.length
-    ? `/${segments[0]}`   // "/documentation_test"
-    : '';                 // en local, ""
+  const repoBase = onGitHubPages && segments.length ? `/${segments[0]}` : '';
 
-  // Construimos el pathname y la URL completa de login
-  const LOGIN_PATHNAME = `${repoBase}/login/`;        // "/login/" o "/documentation_test/login/"
-  const LOGIN_URL      = `${origin}${LOGIN_PATHNAME}`;
+  const LOGIN_PATH = `${repoBase}/login/`;
+  const LOGIN_URL = `${origin}${LOGIN_PATH}`;
+  const API_TOKEN_URL = 'https://mondotv-api.herokuapp.com/api/v1/session/token';
+  const API_ROLE_URL = 'https://mondotv-api.herokuapp.com/api/v1/session/roles';
 
-  const API_TOKEN    = 'https://mondotv-api.herokuapp.com/api/v1/session/token';
-  const STORAGE_KEY  = 'mkdocs_auth_token';
-  const TIME_KEY     = 'mkdocs_auth_time';
-  const REDIRECT_KEY = 'mkdocs_auth_target';
-  const SESSION_TTL  = 60 * 60 * 1000; // 1 hora
+  const STORAGE_TOKEN = 'mkdocs_auth_token';
+  const STORAGE_TIME = 'mkdocs_auth_time';
+  const STORAGE_REDIRECT = 'mkdocs_auth_target';
+  const STORAGE_ROLES = 'mkdocs_user_roles';
 
-  function isSessionValid() {
-    const token = localStorage.getItem(STORAGE_KEY);
-    const ts    = parseInt(localStorage.getItem(TIME_KEY), 10);
-    return token && !isNaN(ts) && (Date.now() - ts < SESSION_TTL);
+  const SESSION_TTL = 3600 * 1000;
+  const ALLOWED = new Set(['admin', 'dev']);
+
+  function isValid() {
+    const t = localStorage.getItem(STORAGE_TOKEN);
+    const ts = Number(localStorage.getItem(STORAGE_TIME));
+    return t && !isNaN(ts) && Date.now() - ts < SESSION_TTL;
   }
 
-  function startSession(token) {
-    localStorage.setItem(STORAGE_KEY, token);
-    localStorage.setItem(TIME_KEY, Date.now().toString());
+  function saveSession(token) {
+    localStorage.setItem(STORAGE_TOKEN, token);
+    localStorage.setItem(STORAGE_TIME, Date.now().toString());
   }
 
   function clearSession() {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(TIME_KEY);
+    localStorage.removeItem(STORAGE_TOKEN);
+    localStorage.removeItem(STORAGE_TIME);
+    localStorage.removeItem(STORAGE_ROLES);
   }
 
-  function handleLoginForm() {
-    const form = document.getElementById('login-form');
-    if (!form) return;
+  function getToken() {
+    return localStorage.getItem(STORAGE_TOKEN) || '';
+  }
 
-    const btn = document.getElementById('login-button');
-    const sp  = document.getElementById('btn-spinner');
+  async function fetchRoles() {
+    const resp = await fetch(API_ROLE_URL, {
+      headers: { 'Authorization': `Bearer ${getToken()}` }
+    });
+    if (!resp.ok) throw new Error(`Status ${resp.status}`);
+    const data = await resp.json();
+    // espera { roles: "admin" }
+    const r = data.roles;
+    return Array.isArray(r) ? r : [r];
+  }
 
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      btn?.classList.add('loading');
-      if (btn) btn.disabled = true;
-      sp?.classList.remove('sr-only');
-
-      const user = form.user.value;
-      const pass = form.pass.value;
-      const machineId = 'browser-' + navigator.userAgent;
-      const basic     = btoa(`${user}:${pass}`);
-
-      try {
-        const resp = await fetch(API_TOKEN, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Basic ${basic}`,
-            'Content-Type':  'application/json',
-            'Accept':        '*/*'
-          },
-          body: JSON.stringify({ machine_id: machineId })
-        });
-        if (!resp.ok) throw new Error(`Error ${resp.status}`);
-
-        const { access_token: token } = await resp.json();
-        if (!token) throw new Error('No se recibió access_token');
-
-        startSession(token);
-        const targetPath = sessionStorage.getItem(REDIRECT_KEY) || `${repoBase}/`;
-        sessionStorage.removeItem(REDIRECT_KEY);
-        window.location.replace(`${origin}${targetPath}`);
-
-      } catch (err) {
-        console.error('Login failed:', err);
-        const errDiv = document.getElementById('error');
-        if (errDiv) {
-          errDiv.textContent = 'Usuario o contraseña incorrectos';
-          errDiv.style.display = 'block';
-        }
-      } finally {
-        btn?.classList.remove('loading');
-        if (btn) btn.disabled = false;
-        sp?.classList.add('sr-only');
+  function hideInternal(permitted) {
+    document.querySelectorAll('.md-tabs a').forEach(a => {
+      if (a.textContent.trim() === 'Dev Guide Internal' && !permitted) {
+        a.parentElement.style.display = 'none';
       }
     });
   }
 
-  async function requireLogin() {
-    // Si ya estamos exactamente en la URL de login, arrancamos el form
-    if (pathname === LOGIN_PATHNAME) {
-      document.documentElement.style.visibility = '';
-      return handleLoginForm();
-    }
-
-    // Si no hay sesión, redirigimos a login
-    if (!isSessionValid()) {
-      clearSession();
-      sessionStorage.setItem(REDIRECT_KEY, pathname + search);
-      window.location.replace(LOGIN_URL);
-    } else {
-      // Sesión válida: refrescamos timestamp y mostramos contenido
-      startSession(localStorage.getItem(STORAGE_KEY));
-      document.documentElement.style.visibility = '';
-    }
+  function deny() {
+    document.documentElement.style.visibility = '';
+    document.body.innerHTML =
+      '<div style="padding:2rem; text-align:center;">' +
+      '<h1>Acceso Denegado</h1><p>No tienes permiso.</p></div>';
   }
 
-  // Ocultamos todo hasta validar la sesión o mostrar el login
+  function setupLogin() {
+    const form = document.getElementById('login-form');
+    if (!form) return;
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const btn = document.getElementById('login-button');
+      const spinner = document.getElementById('btn-spinner');
+      btn.disabled = true;
+      spinner.classList.remove('sr-only');
+
+      const user = form.user.value;
+      const pass = form.pass.value;
+      const basic = btoa(`${user}:${pass}`);
+
+      try {
+        const resp = await fetch(API_TOKEN_URL, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Basic ${basic}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ machine_id: 'browser-' + navigator.userAgent })
+        });
+        if (!resp.ok) throw new Error();
+        const { access_token: token } = await resp.json();
+        saveSession(token);
+        const target = sessionStorage.getItem(STORAGE_REDIRECT) || `${repoBase}/`;
+        sessionStorage.removeItem(STORAGE_REDIRECT);
+        window.location.replace(origin + target);
+      } catch {
+        document.getElementById('error').textContent = 'Credenciales inválidas';
+        document.getElementById('error').style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        spinner.classList.add('sr-only');
+      }
+    });
+  }
+
   document.documentElement.style.visibility = 'hidden';
-  requireLogin();
+
+  async function init() {
+    if (pathname === LOGIN_PATH) {
+      document.documentElement.style.visibility = '';
+      return setupLogin();
+    }
+
+    if (!isValid()) {
+      clearSession();
+      sessionStorage.setItem(STORAGE_REDIRECT, pathname + search);
+      return window.location.replace(LOGIN_URL);
+    }
+
+    saveSession(getToken());
+
+    let roles = [];
+    try {
+      roles = await fetchRoles();
+      localStorage.setItem(STORAGE_ROLES, JSON.stringify(roles));
+    } catch {}
+    const ok = roles.some(r => ALLOWED.has(r));
+
+    if (pathname.includes('/internal/') && !ok) return deny();
+
+    document.documentElement.style.visibility = '';
+    hideInternal(ok);
+  }
+
+  await init();
 })();
